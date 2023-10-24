@@ -1,3 +1,4 @@
+// This file will be used while migrating to forumapi_test
 {
   "user": "test",
   "password": "test",

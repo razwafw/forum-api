@@ -9,6 +9,7 @@ const testConfig = {
   database: process.env.PGDATABASE_TEST,
 };
 
+// process.env.NODE_ENV === 'test' when run by jest
 const pool = process.env.NODE_ENV === 'test' ? new Pool(testConfig) : new Pool();
 
 module.exports = pool;
