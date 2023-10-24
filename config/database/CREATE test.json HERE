@@ -1,0 +1,7 @@
+{
+  "user": "test",
+  "password": "test",
+  "host": "test",
+  "port": test,
+  "database": "forumapi_test"
+}
