@@ -10,6 +10,7 @@ describe('AddThreadUseCase', () => {
       title: 'a thread title',
       body: 'a thread body',
     };
+    const fakeUserId = 'user-123';
 
     const mockAddedThread = new AddedThread({
       id: 'thread-123',
@@ -30,7 +31,7 @@ describe('AddThreadUseCase', () => {
     });
 
     // Action
-    const addedThread = await addThreadUseCase.execute(useCasePayload);
+    const addedThread = await addThreadUseCase.execute(useCasePayload, fakeUserId);
 
     // Assert
     expect(addedThread).toStrictEqual(new AddedThread({
@@ -38,9 +39,12 @@ describe('AddThreadUseCase', () => {
       title: useCasePayload.title,
       owner: 'user-123',
     }));
-    expect(mockThreadRepository.addThread).toBeCalledWith(new AddThread({
-      title: 'a thread title',
-      body: 'a thread body',
-    }));
+    expect(mockThreadRepository.addThread).toBeCalledWith(
+      new AddThread({
+        title: 'a thread title',
+        body: 'a thread body',
+      }),
+      'user-123',
+    );
   });
 });
