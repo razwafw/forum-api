@@ -9,6 +9,7 @@ describe('AddCommentUseCase', () => {
     const useCasePayload = {
       content: 'a thread comment',
     };
+    const fakeThreadId = 'thread-123';
     const fakeUserId = 'user-123';
 
     const mockAddedComment = new AddedComment({
@@ -30,7 +31,7 @@ describe('AddCommentUseCase', () => {
     });
 
     // Action
-    const addedComment = await addCommentUseCase.execute(useCasePayload, fakeUserId);
+    const addedComment = await addCommentUseCase.execute(useCasePayload, fakeThreadId, fakeUserId);
 
     // Assert
     expect(addedComment).toStrictEqual(new AddedComment({
@@ -42,6 +43,7 @@ describe('AddCommentUseCase', () => {
       new AddComment({
         content: 'a thread comment',
       }),
+      'thread-123',
       'user-123',
     );
   });
