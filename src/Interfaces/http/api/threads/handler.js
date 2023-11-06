@@ -24,5 +24,3 @@ class ThreadsHandler {
 }
 
 module.exports = ThreadsHandler;
-
-module.exports = ThreadsHandler;
