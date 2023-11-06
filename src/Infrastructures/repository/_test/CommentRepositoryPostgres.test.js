@@ -1,6 +1,7 @@
 const ThreadCommentsTableTestHelper = require('../../../../tests/ThreadCommentsTableTestHelper');
 const ThreadsTableTestHelper = require('../../../../tests/ThreadsTableTestHelper');
 const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
+const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
 const AddComment = require('../../../Domains/comments/entities/AddComment');
 const AddedComment = require('../../../Domains/comments/entities/AddedComment');
 const pool = require('../../database/postgres/pool');
@@ -18,6 +19,26 @@ describe('CommentRepositoryPostgres', () => {
   });
 
   describe('addComment function', () => {
+    it('should should throw error if thread is invalid', async () => {
+      // Arrange
+      const addComment = new AddComment({
+        content: 'a thread comment',
+      });
+      const fakeIdGenerator = () => '123';
+      const fakeUserId = 'user-123';
+      const invalidThreadId = 'thread-invalid';
+      await UsersTableTestHelper.addUser({ id: fakeUserId });
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(
+        pool,
+        fakeIdGenerator,
+      );
+
+      // Action & Assert
+      expect(commentRepositoryPostgres.addComment(addComment, invalidThreadId, fakeUserId))
+        .rejects
+        .toThrowError(NotFoundError);
+    });
+
     it('should persist data from addComment object in database', async () => {
       // Arrange
       const addComment = new AddComment({
