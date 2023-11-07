@@ -8,6 +8,7 @@ class ThreadsHandler {
 
     this.postThreadHandler = this.postThreadHandler.bind(this);
     this.postThreadCommentHandler = this.postThreadCommentHandler.bind(this);
+    this.deleteThreadCommentHandler = this.deleteThreadCommentHandler.bind(this);
   }
 
   async postThreadHandler(request, h) {
