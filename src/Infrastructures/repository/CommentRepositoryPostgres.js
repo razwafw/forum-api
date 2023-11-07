@@ -2,6 +2,7 @@ const { DatabaseError } = require('pg');
 const NotFoundError = require('../../Commons/exceptions/NotFoundError');
 const AddedComment = require('../../Domains/comments/entities/AddedComment');
 const CommentRepository = require('../../Domains/comments/CommentRepository');
+const AuthorizationError = require('../../Commons/exceptions/AuthorizationError');
 
 class CommentRepositoryPostgres extends CommentRepository {
   constructor(pool, idGenerator) {
@@ -28,6 +29,34 @@ class CommentRepositoryPostgres extends CommentRepository {
         throw new NotFoundError('id thread yang Anda kirim invalid');
       }
       return {};
+    }
+  }
+
+  async removeComment(threadId, commentId, userId) {
+    await this._verifyCommentAccess(threadId, commentId, userId);
+
+    const query = {
+      text: 'UPDATE thread_comments SET is_deleted = $1 WHERE thread_id = $2 AND id = $3',
+      values: [true, threadId, commentId],
+    };
+
+    await this._pool.query(query);
+  }
+
+  async _verifyCommentAccess(threadId, commentId, userId) {
+    const query = {
+      text: 'SELECT owner FROM thread_comments where id = $1 AND thread_id = $2',
+      values: [commentId, threadId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      throw new NotFoundError('komentar yang ingin dihapus invalid');
+    }
+
+    if (result.rows[0].owner !== userId) {
+      throw new AuthorizationError('Anda bukan pemilik komentar tersebut');
     }
   }
 }
