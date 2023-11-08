@@ -19,7 +19,7 @@ describe('an AddReply entity', () => {
     expect(() => new AddReply(payload)).toThrowError('ADD_REPLY.NOT_MEET_DATA_TYPE_SPECIFICATION');
   });
 
-  it('should create AddReply object correctly', () => {
+  it('should create addReply object correctly', () => {
     // Arrange
     const payload = {
       content: 'a comment reply',
