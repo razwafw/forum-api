@@ -1,4 +1,5 @@
 const pool = require('../../database/postgres/pool');
+const CommentRepliesTableTestHelper = require('../../../../tests/CommentRepliesTableTestHelper');
 const ThreadCommentsTableTestHelper = require('../../../../tests/ThreadCommentsTableTestHelper');
 const ThreadsTableTestHelper = require('../../../../tests/ThreadsTableTestHelper');
 const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
@@ -273,9 +274,6 @@ describe('/threads endpoint', () => {
       expect(responseJson.message).toEqual('komentar berhasil dihapus');
     });
 
-    // TODO: create test scenario for when authentication is missing, comment is invalid, and
-    // user is unauthorized
-
     it('should response 401 when request does not include required authetication', async () => {
       // Arrange
       const fakeUserId = 'user-123';
@@ -367,6 +365,205 @@ describe('/threads endpoint', () => {
       // Assert
       const responseJson = JSON.parse(response.payload);
       expect(response.statusCode).toEqual(403);
+      expect(responseJson.status).toEqual('fail');
+      expect(typeof responseJson.message).toBe('string');
+      expect(responseJson.message).not.toEqual('');
+    });
+  });
+
+  describe('when POST /threads/{threadId}/comments/{commentId}/replies', () => {
+    afterEach(async () => {
+      await CommentRepliesTableTestHelper.cleanTable();
+      await ThreadCommentsTableTestHelper.cleanTable();
+      await ThreadsTableTestHelper.cleanTable();
+      await UsersTableTestHelper.cleanTable();
+    });
+
+    it('should respond 201 and and persists comment', async () => {
+      // Arrange
+      const fakeUserId = 'user-123';
+      const fakeUsername = 'fake_user';
+      const fakeThreadId = 'thread-123';
+      const fakeCommentId = 'comment-123';
+      const requestPayload = {
+        content: 'a comment reply',
+      };
+      await UsersTableTestHelper.addUser({ id: fakeUserId, username: fakeUsername });
+      await ThreadsTableTestHelper.addThread({ id: fakeThreadId, owner: fakeUserId });
+      await ThreadCommentsTableTestHelper.addComment({
+        id: fakeCommentId,
+        threadId: fakeThreadId,
+        owner: fakeUserId,
+      });
+      const accessToken = await ServerTestHelper.createAccessToken({
+        username: fakeUsername,
+        id: fakeUserId,
+      });
+      const server = await createServer(container);
+
+      // Action
+      const response = await server.inject({
+        method: 'POST',
+        url: `/threads/${fakeThreadId}/comments/${fakeCommentId}/replies`,
+        payload: requestPayload,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      // Assert
+      const responseJson = JSON.parse(response.payload);
+      expect(response.statusCode).toEqual(201);
+      expect(responseJson.status).toEqual('success');
+      expect(responseJson.data.addedReply).toBeDefined();
+    });
+
+    it('should response 401 when request does not include required authetication', async () => {
+      // Arrange
+      const fakeUserId = 'user-123';
+      const fakeUsername = 'fake_user';
+      const fakeThreadId = 'thread-123';
+      const fakeCommentId = 'comment-123';
+      const requestPayload = {
+        content: 'a comment reply',
+      };
+      await UsersTableTestHelper.addUser({ id: fakeUserId, username: fakeUsername });
+      await ThreadsTableTestHelper.addThread({ id: fakeThreadId, owner: fakeUserId });
+      await ThreadCommentsTableTestHelper.addComment({
+        id: fakeCommentId,
+        threadId: fakeThreadId,
+        owner: fakeUserId,
+      });
+      const server = await createServer(container);
+
+      // Action
+      const response = await server.inject({
+        method: 'POST',
+        url: `/threads/${fakeThreadId}/comments/${fakeCommentId}/replies`,
+        payload: requestPayload,
+      });
+
+      // Assert
+      const responseJson = JSON.parse(response.payload);
+      expect(response.statusCode).toEqual(401);
+      expect(responseJson.message).toEqual('Missing authentication');
+    });
+
+    it('should respond 404 when thread is invalid', async () => {
+      // Arrange
+      const fakeUserId = 'user-123';
+      const fakeUsername = 'fake_user';
+      const fakeThreadId = 'thread-123';
+      const invalidThreadId = 'thread-invalid';
+      const fakeCommentId = 'comment-123';
+      const requestPayload = {
+        content: 'a comment reply',
+      };
+      await UsersTableTestHelper.addUser({ id: fakeUserId, username: fakeUsername });
+      await ThreadsTableTestHelper.addThread({ id: fakeThreadId, owner: fakeUserId });
+      await ThreadCommentsTableTestHelper.addComment({
+        id: fakeCommentId,
+        threadId: fakeThreadId,
+        owner: fakeUserId,
+      });
+      const accessToken = await ServerTestHelper.createAccessToken({
+        username: fakeUsername,
+        id: fakeUserId,
+      });
+      const server = await createServer(container);
+
+      // Action
+      const response = await server.inject({
+        method: 'POST',
+        url: `/threads/${invalidThreadId}/comments/${fakeCommentId}/replies`,
+        payload: requestPayload,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      // Assert
+      const responseJson = JSON.parse(response.payload);
+      expect(response.statusCode).toEqual(404);
+      expect(responseJson.status).toEqual('fail');
+      expect(typeof responseJson.message).toBe('string');
+      expect(responseJson.message).not.toEqual('');
+    });
+
+    it('should respond 404 when comment is invalid', async () => {
+      // Arrange
+      const fakeUserId = 'user-123';
+      const fakeUsername = 'fake_user';
+      const fakeThreadId = 'thread-123';
+      const fakeCommentId = 'comment-123';
+      const invalidCommentId = 'comment-invalid';
+      const requestPayload = {
+        content: 'a comment reply',
+      };
+      await UsersTableTestHelper.addUser({ id: fakeUserId, username: fakeUsername });
+      await ThreadsTableTestHelper.addThread({ id: fakeThreadId, owner: fakeUserId });
+      await ThreadCommentsTableTestHelper.addComment({
+        id: fakeCommentId,
+        threadId: fakeThreadId,
+        owner: fakeUserId,
+      });
+      const accessToken = await ServerTestHelper.createAccessToken({
+        username: fakeUsername,
+        id: fakeUserId,
+      });
+      const server = await createServer(container);
+
+      // Action
+      const response = await server.inject({
+        method: 'POST',
+        url: `/threads/${fakeThreadId}/comments/${invalidCommentId}/replies`,
+        payload: requestPayload,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      // Assert
+      const responseJson = JSON.parse(response.payload);
+      expect(response.statusCode).toEqual(404);
+      expect(responseJson.status).toEqual('fail');
+      expect(typeof responseJson.message).toBe('string');
+      expect(responseJson.message).not.toEqual('');
+    });
+
+    it('should response 400 when request payload is incorrect', async () => {
+      // Arrange
+      const fakeUserId = 'user-123';
+      const fakeUsername = 'fake_user';
+      const fakeThreadId = 'thread-123';
+      const fakeCommentId = 'comment-123';
+      const requestPayload = {};
+      await UsersTableTestHelper.addUser({ id: fakeUserId, username: fakeUsername });
+      await ThreadsTableTestHelper.addThread({ id: fakeThreadId, owner: fakeUserId });
+      await ThreadCommentsTableTestHelper.addComment({
+        id: fakeCommentId,
+        threadId: fakeThreadId,
+        owner: fakeUserId,
+      });
+      const accessToken = await ServerTestHelper.createAccessToken({
+        username: fakeUsername,
+        id: fakeUserId,
+      });
+      const server = await createServer(container);
+
+      // Action
+      const response = await server.inject({
+        method: 'POST',
+        url: `/threads/${fakeThreadId}/comments/${fakeCommentId}/replies`,
+        payload: requestPayload,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      // Assert
+      const responseJson = JSON.parse(response.payload);
+      expect(response.statusCode).toEqual(400);
       expect(responseJson.status).toEqual('fail');
       expect(typeof responseJson.message).toBe('string');
       expect(responseJson.message).not.toEqual('');
