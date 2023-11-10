@@ -1,3 +1,5 @@
+const autoBind = require('auto-bind');
+
 const AddThreadUseCase = require('../../../../Applications/use_case/AddThreadUseCase');
 const AddCommentUseCase = require('../../../../Applications/use_case/AddCommentUseCase');
 const RemoveCommentUseCase = require('../../../../Applications/use_case/RemoveCommentUseCase');
@@ -8,10 +10,7 @@ class ThreadsHandler {
   constructor(container) {
     this._container = container;
 
-    this.postThreadHandler = this.postThreadHandler.bind(this);
-    this.postThreadCommentHandler = this.postThreadCommentHandler.bind(this);
-    this.deleteThreadCommentHandler = this.deleteThreadCommentHandler.bind(this);
-    this.postCommentReplyHandler = this.postCommentReplyHandler.bind(this);
+    autoBind(this);
   }
 
   async postThreadHandler(request, h) {
