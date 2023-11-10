@@ -2,6 +2,7 @@ const AddThreadUseCase = require('../../../../Applications/use_case/AddThreadUse
 const AddCommentUseCase = require('../../../../Applications/use_case/AddCommentUseCase');
 const RemoveCommentUseCase = require('../../../../Applications/use_case/RemoveCommentUseCase');
 const AddReplyUseCase = require('../../../../Applications/use_case/AddReplyUseCase');
+const RemoveReplyUseCase = require('../../../../Applications/use_case/RemoveReplyUseCase');
 
 class ThreadsHandler {
   constructor(container) {
@@ -76,6 +77,20 @@ class ThreadsHandler {
       },
     });
     response.code(201);
+    return response;
+  }
+
+  async deleteCommentReplyHandler(request, h) {
+    const removeReplyUseCase = this._container.getInstance(RemoveReplyUseCase.name);
+    const { id: userId } = request.auth.credentials;
+    const { threadId, commentId, replyId } = request.params;
+
+    await removeReplyUseCase.execute(threadId, commentId, replyId, userId);
+
+    const response = h.response({
+      status: 'success',
+      message: 'balasan berhasil dihapus',
+    });
     return response;
   }
 }
