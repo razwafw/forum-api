@@ -1,4 +1,5 @@
 const NotFoundError = require('../../Commons/exceptions/NotFoundError');
+const AuthorizationError = require('../../Commons/exceptions/AuthorizationError');
 const AddedReply = require('../../Domains/replies/entities/AddedReply');
 const ReplyRepository = require('../../Domains/replies/ReplyRepository');
 
@@ -25,6 +26,17 @@ class ReplyRepositoryPostgres extends ReplyRepository {
     return new AddedReply({ ...result.rows[0] });
   }
 
+  async removeReply(threadId, commentId, replyId, userId) {
+    await this._verifyReplyAccess(threadId, commentId, replyId, userId);
+
+    const query = {
+      text: 'UPDATE comment_replies SET is_deleted = $1 WHERE comment_id = $2 AND id = $3',
+      values: [true, commentId, replyId],
+    };
+
+    await this._pool.query(query);
+  }
+
   async _verifyCommentExistence(threadId, commentId) {
     const query = {
       text: 'SELECT * FROM thread_comments where id = $1 AND thread_id = $2',
@@ -35,6 +47,27 @@ class ReplyRepositoryPostgres extends ReplyRepository {
 
     if (!result.rowCount) {
       throw new NotFoundError('komentar atau thread invalid');
+    }
+  }
+
+  async _verifyReplyAccess(threadId, commentId, replyId, userId) {
+    const query = {
+      text: `SELECT comment_replies.owner 
+             FROM comment_replies
+             LEFT JOIN thread_comments
+             ON comment_replies.comment_id = thread_comments.id
+             WHERE comment_replies.id = $1 AND comment_replies.comment_id = $2 AND thread_comments.thread_id = $3`,
+      values: [replyId, commentId, threadId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      throw new NotFoundError('balasan yang ingin dihapus invalid');
+    }
+
+    if (result.rows[0].owner !== userId) {
+      throw new AuthorizationError('Anda bukan pemilik balasan tersebut');
     }
   }
 }

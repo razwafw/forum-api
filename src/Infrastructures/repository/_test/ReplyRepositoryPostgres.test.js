@@ -3,6 +3,7 @@ const ThreadCommentsTableTestHelper = require('../../../../tests/ThreadCommentsT
 const ThreadsTableTestHelper = require('../../../../tests/ThreadsTableTestHelper');
 const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
 const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
+const AuthorizationError = require('../../../Commons/exceptions/AuthorizationError');
 const AddReply = require('../../../Domains/replies/entities/AddReply');
 const AddedReply = require('../../../Domains/replies/entities/AddedReply');
 const pool = require('../../database/postgres/pool');
@@ -137,6 +138,184 @@ describe('ReplyRepositoryPostgres', () => {
       expect(replyRepositoryPostgres.addReply(addReply, invalidThreadId, fakeCommentId, fakeUserId))
         .rejects
         .toThrowError(NotFoundError);
+    });
+  });
+
+  describe('removeComment function', () => {
+    it('should remove reply if request is valid', async () => {
+      // Arrange
+      const fakeUserId = 'user-123';
+      const fakeThreadId = 'thread-123';
+      const fakeCommentId = 'comment-123';
+      const fakeReplyId = 'reply-123';
+      await UsersTableTestHelper.addUser({ id: fakeUserId });
+      await ThreadsTableTestHelper.addThread({ id: fakeThreadId, owner: fakeUserId });
+      await ThreadCommentsTableTestHelper.addComment({
+        id: fakeCommentId,
+        threadId: fakeThreadId,
+        owner: fakeUserId,
+      });
+      await CommentRepliesTableTestHelper.addReply({
+        id: fakeReplyId,
+        commentId: fakeCommentId,
+        owner: fakeUserId,
+      });
+      const replyRepositoryPostgres = new ReplyRepositoryPostgres(
+        pool,
+        {},
+      );
+
+      // Action
+      await replyRepositoryPostgres.removeReply(
+        fakeThreadId,
+        fakeCommentId,
+        fakeReplyId,
+        fakeUserId,
+      );
+
+      // Assert
+      const fetchedReplyById = await CommentRepliesTableTestHelper.findReplyById('reply-123');
+      expect(fetchedReplyById[0].is_deleted).toEqual(true);
+    });
+
+    it('should throw NotFoundError if thread id is invalid', async () => {
+      // Arrange
+      const fakeUserId = 'user-123';
+      const fakeThreadId = 'thread-123';
+      const invalidThreadId = 'thread-invalid';
+      const fakeCommentId = 'comment-123';
+      const fakeReplyId = 'reply-123';
+      await UsersTableTestHelper.addUser({ id: fakeUserId });
+      await ThreadsTableTestHelper.addThread({ id: fakeThreadId, owner: fakeUserId });
+      await ThreadCommentsTableTestHelper.addComment({
+        id: fakeCommentId,
+        threadId: fakeThreadId,
+        owner: fakeUserId,
+      });
+      await CommentRepliesTableTestHelper.addReply({
+        id: fakeReplyId,
+        commentId: fakeCommentId,
+        owner: fakeUserId,
+      });
+      const replyRepositoryPostgres = new ReplyRepositoryPostgres(
+        pool,
+        {},
+      );
+
+      // Action & Assert
+      expect(replyRepositoryPostgres.removeReply(
+        invalidThreadId,
+        fakeCommentId,
+        fakeReplyId,
+        fakeUserId,
+      ))
+        .rejects
+        .toThrowError(NotFoundError);
+    });
+
+    it('should throw NotFoundError if comment id is invalid', async () => {
+      // Arrange
+      const fakeUserId = 'user-123';
+      const fakeThreadId = 'thread-123';
+      const fakeCommentId = 'comment-123';
+      const invalidCommentId = 'comment-invalid';
+      const fakeReplyId = 'reply-123';
+      await UsersTableTestHelper.addUser({ id: fakeUserId });
+      await ThreadsTableTestHelper.addThread({ id: fakeThreadId, owner: fakeUserId });
+      await ThreadCommentsTableTestHelper.addComment({
+        id: fakeCommentId,
+        threadId: fakeThreadId,
+        owner: fakeUserId,
+      });
+      await CommentRepliesTableTestHelper.addReply({
+        id: fakeReplyId,
+        commentId: fakeCommentId,
+        owner: fakeUserId,
+      });
+      const replyRepositoryPostgres = new ReplyRepositoryPostgres(
+        pool,
+        {},
+      );
+
+      // Action & Assert
+      expect(replyRepositoryPostgres.removeReply(
+        fakeThreadId,
+        invalidCommentId,
+        fakeReplyId,
+        fakeUserId,
+      ))
+        .rejects
+        .toThrowError(NotFoundError);
+    });
+
+    it('should throw NotFoundError if reply id is invalid', async () => {
+      // Arrange
+      const fakeUserId = 'user-123';
+      const fakeThreadId = 'thread-123';
+      const fakeCommentId = 'comment-123';
+      const fakeReplyId = 'reply-123';
+      const invalidReplyId = 'reply-invalid';
+      await UsersTableTestHelper.addUser({ id: fakeUserId });
+      await ThreadsTableTestHelper.addThread({ id: fakeThreadId, owner: fakeUserId });
+      await ThreadCommentsTableTestHelper.addComment({
+        id: fakeCommentId,
+        threadId: fakeThreadId,
+        owner: fakeUserId,
+      });
+      await CommentRepliesTableTestHelper.addReply({
+        id: fakeReplyId,
+        commentId: fakeCommentId,
+        owner: fakeUserId,
+      });
+      const replyRepositoryPostgres = new ReplyRepositoryPostgres(
+        pool,
+        {},
+      );
+
+      // Action & Assert
+      expect(replyRepositoryPostgres.removeReply(
+        fakeThreadId,
+        fakeCommentId,
+        invalidReplyId,
+        fakeUserId,
+      ))
+        .rejects
+        .toThrowError(NotFoundError);
+    });
+
+    it('should throw AuthorizationError if userId does not match comment owner', async () => {
+      // Arrange
+      const fakeUserId = 'user-123';
+      const invalidUserId = 'user-invalid';
+      const fakeThreadId = 'thread-123';
+      const fakeCommentId = 'comment-123';
+      const fakeReplyId = 'reply-123';
+      await UsersTableTestHelper.addUser({ id: fakeUserId });
+      await ThreadsTableTestHelper.addThread({ id: fakeThreadId, owner: fakeUserId });
+      await ThreadCommentsTableTestHelper.addComment({
+        id: fakeCommentId,
+        threadId: fakeThreadId,
+        owner: fakeUserId,
+      });
+      await CommentRepliesTableTestHelper.addReply({
+        id: fakeReplyId,
+        commentId: fakeCommentId,
+        owner: fakeUserId,
+      });
+      const replyRepositoryPostgres = new ReplyRepositoryPostgres(
+        pool,
+        {},
+      );
+
+      // Action & Assert
+      expect(replyRepositoryPostgres.removeReply(
+        fakeThreadId,
+        fakeCommentId,
+        fakeReplyId,
+        invalidUserId,
+      ))
+        .rejects
+        .toThrowError(AuthorizationError);
     });
   });
 });
