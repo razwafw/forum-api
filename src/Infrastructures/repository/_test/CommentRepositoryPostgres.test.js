@@ -91,7 +91,7 @@ describe('CommentRepositoryPostgres', () => {
     });
   });
 
-  describe('removeComment function', () => {
+  describe('removeCommentById function', () => {
     it('should remove comment if request is valid', async () => {
       // Arrange
       const fakeUserId = 'user-123';
@@ -110,7 +110,7 @@ describe('CommentRepositoryPostgres', () => {
       );
 
       // Action
-      await commentRepositoryPostgres.removeComment(fakeThreadId, fakeCommentId, fakeUserId);
+      await commentRepositoryPostgres.removeCommentById(fakeThreadId, fakeCommentId, fakeUserId);
 
       // Assert
       const fetchedCommentById = await ThreadCommentsTableTestHelper.findCommentById('comment-123');
@@ -130,7 +130,11 @@ describe('CommentRepositoryPostgres', () => {
       );
 
       // Action & Assert
-      expect(commentRepositoryPostgres.removeComment(invalidThreadId, fakeCommentId, fakeUserId))
+      expect(commentRepositoryPostgres.removeCommentById(
+        invalidThreadId,
+        fakeCommentId,
+        fakeUserId,
+      ))
         .rejects
         .toThrowError(NotFoundError);
     });
@@ -149,7 +153,11 @@ describe('CommentRepositoryPostgres', () => {
       );
 
       // Action & Assert
-      expect(commentRepositoryPostgres.removeComment(fakeThreadId, invalidCommentId, fakeUserId))
+      expect(commentRepositoryPostgres.removeCommentById(
+        fakeThreadId,
+        invalidCommentId,
+        fakeUserId,
+      ))
         .rejects
         .toThrowError(NotFoundError);
     });
@@ -174,7 +182,7 @@ describe('CommentRepositoryPostgres', () => {
 
       // Action & Assert
       expect(commentRepositoryPostgres
-        .removeComment(fakeThreadId, fakeCommentId, otherFakeUserId))
+        .removeCommentById(fakeThreadId, fakeCommentId, otherFakeUserId))
         .rejects
         .toThrowError(AuthorizationError);
     });

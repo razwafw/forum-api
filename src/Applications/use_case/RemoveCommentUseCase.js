@@ -4,7 +4,7 @@ class RemoveCommentUseCase {
   }
 
   async execute(threadId, commentId, userId) {
-    await this._commentRepository.removeComment(threadId, commentId, userId);
+    await this._commentRepository.removeCommentById(threadId, commentId, userId);
   }
 }
 

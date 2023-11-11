@@ -32,7 +32,7 @@ class CommentRepositoryPostgres extends CommentRepository {
     }
   }
 
-  async removeComment(threadId, commentId, userId) {
+  async removeCommentById(threadId, commentId, userId) {
     await this._verifyCommentAccess(threadId, commentId, userId);
 
     const query = {
