@@ -1,6 +1,7 @@
 const { DatabaseError } = require('pg');
 const NotFoundError = require('../../Commons/exceptions/NotFoundError');
 const AddedComment = require('../../Domains/comments/entities/AddedComment');
+const CommentDetail = require('../../Domains/comments/entities/CommentDetail');
 const CommentRepository = require('../../Domains/comments/CommentRepository');
 const AuthorizationError = require('../../Commons/exceptions/AuthorizationError');
 
@@ -30,6 +31,33 @@ class CommentRepositoryPostgres extends CommentRepository {
       }
       return {};
     }
+  }
+
+  async getCommentsByThreadId(threadId) {
+    const query = {
+      text: `SELECT thread_comments.id, users.username, thread_comments.date, thread_comments.content, thread_comments.is_deleted
+             FROM thread_comments 
+             LEFT JOIN users
+             ON thread_comments.owner = users.id
+             WHERE thread_id = $1`,
+      values: [threadId],
+    };
+
+    const result = await this._pool.query(query);
+
+    const threadComments = result.rows.map((comment) => {
+      const commentDetail = new CommentDetail({
+        id: comment.id,
+        username: comment.username,
+        date: comment.date,
+        content: comment.is_deleted ? '**komentar telah dihapus**' : comment.content,
+      });
+      return commentDetail;
+    });
+
+    await threadComments.sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
+
+    return threadComments;
   }
 
   async removeCommentById(threadId, commentId, userId) {

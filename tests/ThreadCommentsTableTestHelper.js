@@ -23,6 +23,15 @@ const ThreadCommentsTableTestHelper = {
     return result.rows;
   },
 
+  async removeCommentById(id) {
+    const query = {
+      text: 'UPDATE thread_comments SET is_deleted = true WHERE id = $1',
+      values: [id],
+    };
+
+    await pool.query(query);
+  },
+
   async cleanTable() {
     await pool.query('DELETE FROM thread_comments WHERE 1=1');
   },

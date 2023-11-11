@@ -5,6 +5,7 @@ const AuthorizationError = require('../../../Commons/exceptions/AuthorizationErr
 const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
 const AddComment = require('../../../Domains/comments/entities/AddComment');
 const AddedComment = require('../../../Domains/comments/entities/AddedComment');
+const CommentDetail = require('../../../Domains/comments/entities/CommentDetail');
 const pool = require('../../database/postgres/pool');
 const CommentRepositoryPostgres = require('../CommentRepositoryPostgres');
 
@@ -185,6 +186,61 @@ describe('CommentRepositoryPostgres', () => {
         .removeCommentById(fakeThreadId, fakeCommentId, otherFakeUserId))
         .rejects
         .toThrowError(AuthorizationError);
+    });
+
+    describe('getCommentsByThreadId function', () => {
+      it('should return comments data correctly', async () => {
+        // Arrange
+        const fakeThreadId = 'thread-123';
+        const fakeCommentIdA = 'comment-123';
+        const fakeCommentIdB = 'comment-456';
+        // B's comment goes ahead of A's comment
+        const fakeDateCommentB = new Date(100).toISOString();
+        const fakeDateCommentA = new Date(1000).toISOString();
+        const fakeUserId = 'user-123';
+        const fakeUsername = 'fake_user';
+
+        await UsersTableTestHelper.addUser({ id: fakeUserId, username: fakeUsername });
+        await ThreadsTableTestHelper.addThread({ id: fakeThreadId, owner: fakeUserId });
+        await ThreadCommentsTableTestHelper.addComment({
+          id: fakeCommentIdA,
+          threadId: fakeThreadId,
+          owner: fakeUserId,
+          date: fakeDateCommentA,
+        });
+        await ThreadCommentsTableTestHelper.addComment({
+          id: fakeCommentIdB,
+          threadId: fakeThreadId,
+          owner: fakeUserId,
+          date: fakeDateCommentB,
+        });
+        await ThreadCommentsTableTestHelper.removeCommentById(fakeCommentIdB);
+        const commentRepositoryPostgres = new CommentRepositoryPostgres(
+          pool,
+          {},
+        );
+
+        // Action
+        const threadComments = await commentRepositoryPostgres.getCommentsByThreadId(fakeThreadId);
+
+        // Assert
+        expect(threadComments).toStrictEqual([
+          new CommentDetail({
+            id: 'comment-456',
+            username: 'fake_user',
+            date: fakeDateCommentB,
+            replies: [],
+            content: '**komentar telah dihapus**',
+          }),
+          new CommentDetail({
+            id: 'comment-123',
+            username: 'fake_user',
+            date: fakeDateCommentA,
+            replies: [],
+            content: 'a thread comment',
+          }),
+        ]);
+      });
     });
   });
 });
