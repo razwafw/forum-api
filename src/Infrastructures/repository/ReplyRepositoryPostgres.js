@@ -33,7 +33,7 @@ class ReplyRepositoryPostgres extends ReplyRepository {
              FROM comment_replies 
              LEFT JOIN users
              ON comment_replies.owner = users.id
-             WHERE comment_id = $1`,
+             WHERE comment_replies.comment_id = $1`,
       values: [commentId],
     };
 

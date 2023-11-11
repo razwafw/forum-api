@@ -39,7 +39,7 @@ class CommentRepositoryPostgres extends CommentRepository {
              FROM thread_comments 
              LEFT JOIN users
              ON thread_comments.owner = users.id
-             WHERE thread_id = $1`,
+             WHERE thread_comments.thread_id = $1`,
       values: [threadId],
     };
 
