@@ -819,4 +819,67 @@ describe('/threads endpoint', () => {
       expect(responseJson.message).not.toEqual('');
     });
   });
+
+  describe('when GET /threads/{threadId}', () => {
+    afterEach(async () => {
+      await CommentRepliesTableTestHelper.cleanTable();
+      await ThreadCommentsTableTestHelper.cleanTable();
+      await ThreadsTableTestHelper.cleanTable();
+      await UsersTableTestHelper.cleanTable();
+    });
+
+    it('should respond 200 and return correct thread data', async () => {
+      // Arrange
+      const fakeUserId = 'user-123';
+      const fakeUsername = 'fake_user';
+      const fakeThreadId = 'thread-123';
+      const fakeCommentIdA = 'comment-123';
+      const fakeCommentIdB = 'comment-456';
+      const fakeReplyIdA = 'reply-123';
+      const fakeReplyIdB = 'reply-456';
+      const fakeReplyIdC = 'reply-789';
+      await UsersTableTestHelper.addUser({ id: fakeUserId, username: fakeUsername });
+      await ThreadsTableTestHelper.addThread({ id: fakeThreadId, owner: fakeUserId });
+      await ThreadCommentsTableTestHelper.addComment({
+        id: fakeCommentIdA,
+        threadId: fakeThreadId,
+        owner: fakeUserId,
+      });
+      await ThreadCommentsTableTestHelper.addComment({
+        id: fakeCommentIdB,
+        threadId: fakeThreadId,
+        owner: fakeUserId,
+      });
+      await CommentRepliesTableTestHelper.addReply({
+        id: fakeReplyIdA,
+        commentId: fakeCommentIdA,
+        owner: fakeUserId,
+      });
+      await CommentRepliesTableTestHelper.addReply({
+        id: fakeReplyIdB,
+        commentId: fakeCommentIdA,
+        owner: fakeUserId,
+      });
+      await CommentRepliesTableTestHelper.addReply({
+        id: fakeReplyIdC,
+        commentId: fakeCommentIdB,
+        owner: fakeUserId,
+      });
+      await CommentRepliesTableTestHelper.removeReplyById(fakeReplyIdB);
+      await ThreadCommentsTableTestHelper.removeCommentById(fakeCommentIdB);
+      const server = await createServer(container);
+
+      // Action
+      const response = await server.inject({
+        method: 'GET',
+        url: `/threads/${fakeThreadId}`,
+      });
+
+      // Assert
+      const responseJson = JSON.parse(response.payload);
+      expect(response.statusCode).toEqual(200);
+      expect(responseJson.status).toEqual('success');
+      expect(responseJson.data.thread).toBeDefined();
+    });
+  });
 });

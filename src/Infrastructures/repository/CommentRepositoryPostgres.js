@@ -1,4 +1,3 @@
-const { DatabaseError } = require('pg');
 const NotFoundError = require('../../Commons/exceptions/NotFoundError');
 const AddedComment = require('../../Domains/comments/entities/AddedComment');
 const CommentDetail = require('../../Domains/comments/entities/CommentDetail');
@@ -25,11 +24,8 @@ class CommentRepositoryPostgres extends CommentRepository {
     try {
       const result = await this._pool.query(query);
       return new AddedComment({ ...result.rows[0] });
-    } catch (error) {
-      if (error instanceof DatabaseError) {
-        throw new NotFoundError('id thread yang Anda kirim invalid');
-      }
-      return {};
+    } catch {
+      throw new NotFoundError('komentar tidak dapat ditambahkan karena thread invalid');
     }
   }
 

@@ -9,11 +9,12 @@ class GetThreadDetailUseCase {
     const threadDetail = await this._threadRepository.getThreadById(threadId);
     const threadComments = await this._commentRepository.getCommentsByThreadId(threadDetail.id);
 
-    await threadComments.forEach(async (commentDetail) => {
+    // Note: all the processes below will run in parallel
+    await Promise.all(threadComments.map(async (commentDetail) => {
       const commentReplies = await this._replyRepository.getRepliesByCommentId(commentDetail.id);
       // eslint-disable-next-line no-param-reassign
       commentDetail.replies = commentReplies;
-    });
+    }));
 
     threadDetail.comments = threadComments;
 
