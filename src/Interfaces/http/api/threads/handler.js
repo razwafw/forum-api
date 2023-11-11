@@ -5,6 +5,7 @@ const AddCommentUseCase = require('../../../../Applications/use_case/AddCommentU
 const RemoveCommentUseCase = require('../../../../Applications/use_case/RemoveCommentUseCase');
 const AddReplyUseCase = require('../../../../Applications/use_case/AddReplyUseCase');
 const RemoveReplyUseCase = require('../../../../Applications/use_case/RemoveReplyUseCase');
+const GetThreadDetailUseCase = require('../../../../Applications/use_case/GetThreadDetailUseCase');
 
 class ThreadsHandler {
   constructor(container) {
@@ -89,6 +90,21 @@ class ThreadsHandler {
     const response = h.response({
       status: 'success',
       message: 'balasan berhasil dihapus',
+    });
+    return response;
+  }
+
+  async getThreadDetailHandler(request, h) {
+    const getThreadDetailUseCase = this._container.getInstance(GetThreadDetailUseCase.name);
+    const { threadId } = request.params;
+
+    const threadDetail = await getThreadDetailUseCase.execute(threadId);
+
+    const response = h.response({
+      status: 'success',
+      data: {
+        thread: threadDetail,
+      },
     });
     return response;
   }
