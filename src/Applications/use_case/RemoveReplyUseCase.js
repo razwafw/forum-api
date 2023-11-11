@@ -4,7 +4,7 @@ class RemoveReplyUseCase {
   }
 
   async execute(threadId, commentId, replyId, userId) {
-    await this._replyRepository.removeReply(threadId, commentId, replyId, userId);
+    await this._replyRepository.removeReplyById(threadId, commentId, replyId, userId);
   }
 }
 

@@ -142,7 +142,7 @@ describe('ReplyRepositoryPostgres', () => {
     });
   });
 
-  describe('removeComment function', () => {
+  describe('removeReplyById function', () => {
     it('should remove reply if request is valid', async () => {
       // Arrange
       const fakeUserId = 'user-123';
@@ -167,7 +167,7 @@ describe('ReplyRepositoryPostgres', () => {
       );
 
       // Action
-      await replyRepositoryPostgres.removeReply(
+      await replyRepositoryPostgres.removeReplyById(
         fakeThreadId,
         fakeCommentId,
         fakeReplyId,
@@ -204,7 +204,7 @@ describe('ReplyRepositoryPostgres', () => {
       );
 
       // Action & Assert
-      expect(replyRepositoryPostgres.removeReply(
+      expect(replyRepositoryPostgres.removeReplyById(
         invalidThreadId,
         fakeCommentId,
         fakeReplyId,
@@ -239,7 +239,7 @@ describe('ReplyRepositoryPostgres', () => {
       );
 
       // Action & Assert
-      expect(replyRepositoryPostgres.removeReply(
+      expect(replyRepositoryPostgres.removeReplyById(
         fakeThreadId,
         invalidCommentId,
         fakeReplyId,
@@ -274,7 +274,7 @@ describe('ReplyRepositoryPostgres', () => {
       );
 
       // Action & Assert
-      expect(replyRepositoryPostgres.removeReply(
+      expect(replyRepositoryPostgres.removeReplyById(
         fakeThreadId,
         fakeCommentId,
         invalidReplyId,
@@ -309,7 +309,7 @@ describe('ReplyRepositoryPostgres', () => {
       );
 
       // Action & Assert
-      expect(replyRepositoryPostgres.removeReply(
+      expect(replyRepositoryPostgres.removeReplyById(
         fakeThreadId,
         fakeCommentId,
         fakeReplyId,

@@ -13,7 +13,7 @@ describe('RemoveReplyUseCase', () => {
     const mockReplyRepository = new ReplyRepository();
 
     /** mocking needed function */
-    mockReplyRepository.removeReply = jest.fn()
+    mockReplyRepository.removeReplyById = jest.fn()
       .mockImplementation(() => Promise.resolve());
 
     /** creating use case instance */
@@ -25,7 +25,7 @@ describe('RemoveReplyUseCase', () => {
     await removeReplyUseCase.execute(fakeThreadId, fakeCommentId, fakeReplyId, fakeUserId);
 
     // Assert
-    expect(mockReplyRepository.removeReply).toBeCalledWith(
+    expect(mockReplyRepository.removeReplyById).toBeCalledWith(
       'thread-123',
       'comment-123',
       'reply-123',

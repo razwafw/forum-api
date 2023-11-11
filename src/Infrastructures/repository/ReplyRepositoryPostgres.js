@@ -54,7 +54,7 @@ class ReplyRepositoryPostgres extends ReplyRepository {
     return commentReplies;
   }
 
-  async removeReply(threadId, commentId, replyId, userId) {
+  async removeReplyById(threadId, commentId, replyId, userId) {
     await this._verifyReplyAccess(threadId, commentId, replyId, userId);
 
     const query = {
