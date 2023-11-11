@@ -1,6 +1,7 @@
 const NotFoundError = require('../../Commons/exceptions/NotFoundError');
 const AuthorizationError = require('../../Commons/exceptions/AuthorizationError');
 const AddedReply = require('../../Domains/replies/entities/AddedReply');
+const ReplyDetail = require('../../Domains/replies/entities/ReplyDetail');
 const ReplyRepository = require('../../Domains/replies/ReplyRepository');
 
 class ReplyRepositoryPostgres extends ReplyRepository {
@@ -26,12 +27,39 @@ class ReplyRepositoryPostgres extends ReplyRepository {
     return new AddedReply({ ...result.rows[0] });
   }
 
+  async getRepliesByCommentId(commentId) {
+    const query = {
+      text: `SELECT comment_replies.id, comment_replies.content, comment_replies.date, users.username, comment_replies.is_deleted
+             FROM comment_replies 
+             LEFT JOIN users
+             ON comment_replies.owner = users.id
+             WHERE comment_id = $1`,
+      values: [commentId],
+    };
+
+    const result = await this._pool.query(query);
+
+    const commentReplies = result.rows.map((reply) => {
+      const replyDetail = new ReplyDetail({
+        id: reply.id,
+        content: reply.is_deleted ? '**balasan telah dihapus**' : reply.content,
+        date: reply.date,
+        username: reply.username,
+      });
+      return replyDetail;
+    });
+
+    await commentReplies.sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
+
+    return commentReplies;
+  }
+
   async removeReply(threadId, commentId, replyId, userId) {
     await this._verifyReplyAccess(threadId, commentId, replyId, userId);
 
     const query = {
-      text: 'UPDATE comment_replies SET is_deleted = $1 WHERE comment_id = $2 AND id = $3',
-      values: [true, commentId, replyId],
+      text: 'UPDATE comment_replies SET is_deleted = true WHERE id = $1',
+      values: [replyId],
     };
 
     await this._pool.query(query);

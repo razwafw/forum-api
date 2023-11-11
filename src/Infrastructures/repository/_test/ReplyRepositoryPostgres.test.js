@@ -6,6 +6,7 @@ const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
 const AuthorizationError = require('../../../Commons/exceptions/AuthorizationError');
 const AddReply = require('../../../Domains/replies/entities/AddReply');
 const AddedReply = require('../../../Domains/replies/entities/AddedReply');
+const ReplyDetail = require('../../../Domains/replies/entities/ReplyDetail');
 const pool = require('../../database/postgres/pool');
 const ReplyRepositoryPostgres = require('../ReplyRepositoryPostgres');
 
@@ -316,6 +317,64 @@ describe('ReplyRepositoryPostgres', () => {
       ))
         .rejects
         .toThrowError(AuthorizationError);
+    });
+  });
+
+  describe('getRepliesByCommentId function', () => {
+    it('should return replies data correctly', async () => {
+      // Arrange
+      const fakeThreadId = 'thread-123';
+      const fakeCommentId = 'comment-123';
+      const fakeReplyIdA = 'reply-123';
+      const fakeReplyIdB = 'reply-456';
+      const fakeDateReplyB = new Date(100).toISOString(); // B's reply goes ahead of A's reply
+      const fakeDateReplyA = new Date(1000).toISOString();
+      const fakeUserId = 'user-123';
+      const fakeUsername = 'fake_user';
+
+      await UsersTableTestHelper.addUser({ id: fakeUserId, username: fakeUsername });
+      await ThreadsTableTestHelper.addThread({ id: fakeThreadId, owner: fakeUserId });
+      await ThreadCommentsTableTestHelper.addComment({
+        id: fakeCommentId,
+        threadId: fakeThreadId,
+        owner: fakeUserId,
+      });
+      await CommentRepliesTableTestHelper.addReply({
+        id: fakeReplyIdA,
+        commentId: fakeCommentId,
+        owner: fakeUserId,
+        date: fakeDateReplyA,
+      });
+      await CommentRepliesTableTestHelper.addReply({
+        id: fakeReplyIdB,
+        commentId: fakeCommentId,
+        owner: fakeUserId,
+        date: fakeDateReplyB,
+      });
+      await CommentRepliesTableTestHelper.removeReplyById(fakeReplyIdB);
+      const replyRepositoryPostgres = new ReplyRepositoryPostgres(
+        pool,
+        {},
+      );
+
+      // Action
+      const commentReplies = await replyRepositoryPostgres.getRepliesByCommentId(fakeCommentId);
+
+      // Assert
+      expect(commentReplies).toStrictEqual([
+        new ReplyDetail({
+          id: 'reply-456',
+          content: '**balasan telah dihapus**',
+          date: fakeDateReplyB,
+          username: 'fake_user',
+        }),
+        new ReplyDetail({
+          id: 'reply-123',
+          content: 'a comment reply',
+          date: fakeDateReplyA,
+          username: 'fake_user',
+        }),
+      ]);
     });
   });
 });
