@@ -1,4 +1,4 @@
-class ReplyDetail {
+class CommentDetail {
   constructor(payload) {
     this._verifyPayload(payload);
 
@@ -35,4 +35,4 @@ class ReplyDetail {
   }
 }
 
-module.exports = ReplyDetail;
+module.exports = CommentDetail;
