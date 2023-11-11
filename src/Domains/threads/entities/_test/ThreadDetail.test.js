@@ -7,7 +7,6 @@ describe('an ThreadDetail entity', () => {
       id: 'thread-123',
       title: 'a thread title',
       body: 'a thread body',
-      date: 'Jan 1st, 1970',
       username: 'fake_user',
     };
 
@@ -18,12 +17,11 @@ describe('an ThreadDetail entity', () => {
   it('should throw error when payload did not meet data type specification', () => {
     // Arrange
     const payload = {
-      id: 'thread-123',
+      id: 123,
       title: 'a thread title',
       body: 'a thread body',
       date: 'Jan 1st, 1970',
       username: 'fake_user',
-      comments: {},
     };
 
     // Action and Assert
@@ -38,7 +36,6 @@ describe('an ThreadDetail entity', () => {
       body: 'a thread body',
       date: 'Jan 1st, 1970',
       username: 'fake_user',
-      comments: ['comment 1', 'comment 2'],
     };
 
     // Action
@@ -57,6 +54,6 @@ describe('an ThreadDetail entity', () => {
     expect(body).toEqual('a thread body');
     expect(date).toEqual('Jan 1st, 1970');
     expect(username).toEqual('fake_user');
-    expect(comments).toEqual(['comment 1', 'comment 2']);
+    expect(comments).toEqual([]);
   });
 });

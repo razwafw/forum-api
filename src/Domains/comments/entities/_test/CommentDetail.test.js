@@ -7,7 +7,6 @@ describe('an CommentDetail entity', () => {
       id: 'comment-123',
       username: 'userone',
       date: 'Jan 1st, 1970',
-      content: 'a thread comment',
     };
 
     // Action and Assert
@@ -20,7 +19,6 @@ describe('an CommentDetail entity', () => {
       id: 'comment-123',
       username: 'user',
       date: 123,
-      replies: {},
       content: true,
     };
 
@@ -34,7 +32,6 @@ describe('an CommentDetail entity', () => {
       id: 'comment-123',
       username: 'user',
       date: 'Jan 1st, 1970',
-      replies: ['reply 1', 'reply 2'],
       content: 'a thread comment',
     };
 
@@ -51,7 +48,7 @@ describe('an CommentDetail entity', () => {
     expect(id).toEqual('comment-123');
     expect(username).toEqual('user');
     expect(date).toEqual('Jan 1st, 1970');
-    expect(replies).toEqual(['reply 1', 'reply 2']);
+    expect(replies).toEqual([]);
     expect(content).toEqual('a thread comment');
   });
 });

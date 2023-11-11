@@ -6,7 +6,7 @@ class CommentDetail {
       id,
       username,
       date,
-      replies,
+      replies = [],
       content,
     } = payload;
 
@@ -22,14 +22,13 @@ class CommentDetail {
     id,
     username,
     date,
-    replies,
     content,
   }) {
-    if (!id || !username || !date || !replies || !content) {
+    if (!id || !username || !date || !content) {
       throw new Error('COMMENT_DETAIL.NOT_CONTAIN_NEEDED_PROPERTY');
     }
 
-    if (typeof id !== 'string' || typeof username !== 'string' || typeof date !== 'string' || !Array.isArray(replies) || typeof content !== 'string') {
+    if (typeof id !== 'string' || typeof username !== 'string' || typeof date !== 'string' || typeof content !== 'string') {
       throw new Error('COMMENT_DETAIL.NOT_MEET_DATA_TYPE_SPECIFICATION');
     }
   }
