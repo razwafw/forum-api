@@ -41,13 +41,7 @@ class ThreadRepositoryPostgres extends ThreadRepository {
       throw new NotFoundError('thread tidak dapat ditemukan');
     }
 
-    const threadDetail = new ThreadDetail({
-      id: result.rows[0].id,
-      title: result.rows[0].title,
-      body: result.rows[0].body,
-      date: result.rows[0].date,
-      username: result.rows[0].username,
-    });
+    const threadDetail = new ThreadDetail({ ...result.rows[0] });
 
     return threadDetail;
   }
