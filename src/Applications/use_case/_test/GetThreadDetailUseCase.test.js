@@ -11,49 +11,62 @@ describe('GetThreadDetailUseCase', () => {
     // Arrange
     const fakeThreadId = 'thread-123';
 
-    const mockReplyDetailA = new ReplyDetail({
+    // C's reply goes ahead of B's reply ahead of A's reply
+    const fakeDateReplyC = new Date(10000).toISOString();
+    const fakeDateReplyB = new Date(100000).toISOString();
+    const fakeDateReplyA = new Date(1000000).toISOString();
+    const mockReplyDetailA = {
       id: 'reply-123',
       content: 'a comment reply',
-      date: 'Jan 1st, 1970',
+      date: fakeDateReplyA,
       username: 'user_a',
-    });
-    const mockReplyDetailB = new ReplyDetail({
+      is_deleted: false,
+    };
+    const mockReplyDetailB = {
       id: 'reply-456',
       content: 'a comment reply',
-      date: 'Jan 1st, 1970',
+      date: fakeDateReplyB,
       username: 'user_b',
-    });
-    const mockReplyDetailC = new ReplyDetail({
+      is_deleted: false,
+    };
+    const mockReplyDetailC = {
       id: 'reply-789',
       content: 'a comment reply',
-      date: 'Jan 1st, 1970',
+      date: fakeDateReplyC,
       username: 'user_c',
-    });
+      is_deleted: true,
+    };
     const mockReplyDetails = [
       mockReplyDetailA,
       mockReplyDetailB,
       mockReplyDetailC,
     ];
 
-    const mockCommentDetailA = new CommentDetail({
+    // B's comment goes ahead of A's comment
+    const fakeDateCommentB = new Date(100).toISOString();
+    const fakeDateCommentA = new Date(1000).toISOString();
+    const mockCommentDetailA = {
       id: 'comment-123',
       username: 'user_a',
-      date: 'Jan 1st, 1970',
+      date: fakeDateCommentA,
       content: 'a thread comment',
-    });
-    const mockCommentDetailB = new CommentDetail({
+      is_deleted: true,
+    };
+    const mockCommentDetailB = {
       id: 'comment-456',
       username: 'user_b',
-      date: 'Jan 1st, 1970',
+      date: fakeDateCommentB,
       content: 'a thread comment',
-    });
+      is_deleted: false,
+    };
     const mockCommentDetails = [mockCommentDetailA, mockCommentDetailB];
 
+    const fakeDateThread = new Date(10).toISOString();
     const mockThreadDetail = new ThreadDetail({
       id: 'thread-123',
       title: 'a thread title',
       body: 'a thread body',
-      date: 'Jan 1st, 1970',
+      date: fakeDateThread,
       username: 'user_a',
     });
 
@@ -90,42 +103,42 @@ describe('GetThreadDetailUseCase', () => {
       id: 'thread-123',
       title: 'a thread title',
       body: 'a thread body',
-      date: 'Jan 1st, 1970',
+      date: fakeDateThread,
       username: 'user_a',
       comments: [
         new CommentDetail({
-          id: 'comment-123',
-          username: 'user_a',
-          date: 'Jan 1st, 1970',
+          id: 'comment-456',
+          username: 'user_b',
+          date: fakeDateCommentB,
           replies: [
             new ReplyDetail({
-              id: 'reply-123',
-              content: 'a comment reply',
-              date: 'Jan 1st, 1970',
-              username: 'user_a',
-            }),
-            new ReplyDetail({
-              id: 'reply-456',
-              content: 'a comment reply',
-              date: 'Jan 1st, 1970',
-              username: 'user_b',
+              id: 'reply-789',
+              content: '**balasan telah dihapus**',
+              date: fakeDateReplyC,
+              username: 'user_c',
             }),
           ],
           content: 'a thread comment',
         }),
         new CommentDetail({
-          id: 'comment-456',
-          username: 'user_b',
-          date: 'Jan 1st, 1970',
+          id: 'comment-123',
+          username: 'user_a',
+          date: fakeDateCommentA,
           replies: [
             new ReplyDetail({
-              id: 'reply-789',
+              id: 'reply-456',
               content: 'a comment reply',
-              date: 'Jan 1st, 1970',
-              username: 'user_c',
+              date: fakeDateReplyB,
+              username: 'user_b',
+            }),
+            new ReplyDetail({
+              id: 'reply-123',
+              content: 'a comment reply',
+              date: fakeDateReplyA,
+              username: 'user_a',
             }),
           ],
-          content: 'a thread comment',
+          content: '**komentar telah dihapus**',
         }),
       ],
     }));

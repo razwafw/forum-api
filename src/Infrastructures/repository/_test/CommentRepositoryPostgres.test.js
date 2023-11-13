@@ -5,7 +5,6 @@ const AuthorizationError = require('../../../Commons/exceptions/AuthorizationErr
 const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
 const AddComment = require('../../../Domains/comments/entities/AddComment');
 const AddedComment = require('../../../Domains/comments/entities/AddedComment');
-const CommentDetail = require('../../../Domains/comments/entities/CommentDetail');
 const pool = require('../../database/postgres/pool');
 const CommentRepositoryPostgres = require('../CommentRepositoryPostgres');
 
@@ -194,9 +193,6 @@ describe('CommentRepositoryPostgres', () => {
         const fakeThreadId = 'thread-123';
         const fakeCommentIdA = 'comment-123';
         const fakeCommentIdB = 'comment-456';
-        // B's comment goes ahead of A's comment
-        const fakeDateCommentB = new Date(100).toISOString();
-        const fakeDateCommentA = new Date(1000).toISOString();
         const fakeUserId = 'user-123';
         const fakeUsername = 'fake_user';
 
@@ -206,15 +202,14 @@ describe('CommentRepositoryPostgres', () => {
           id: fakeCommentIdA,
           threadId: fakeThreadId,
           owner: fakeUserId,
-          date: fakeDateCommentA,
+          date: 'Jan 1st, 1970',
         });
         await ThreadCommentsTableTestHelper.addComment({
           id: fakeCommentIdB,
           threadId: fakeThreadId,
           owner: fakeUserId,
-          date: fakeDateCommentB,
+          date: 'Jan 1st, 1970',
         });
-        await ThreadCommentsTableTestHelper.removeCommentById(fakeCommentIdB);
         const commentRepositoryPostgres = new CommentRepositoryPostgres(
           pool,
           {},
@@ -224,22 +219,21 @@ describe('CommentRepositoryPostgres', () => {
         const threadComments = await commentRepositoryPostgres.getCommentsByThreadId(fakeThreadId);
 
         // Assert
-        expect(threadComments).toStrictEqual([
-          new CommentDetail({
-            id: 'comment-456',
-            username: 'fake_user',
-            date: fakeDateCommentB,
-            replies: [],
-            content: '**komentar telah dihapus**',
-          }),
-          new CommentDetail({
-            id: 'comment-123',
-            username: 'fake_user',
-            date: fakeDateCommentA,
-            replies: [],
-            content: 'a thread comment',
-          }),
-        ]);
+        expect(threadComments).toHaveLength(2);
+        expect(threadComments[0]).toEqual(expect.objectContaining({
+          id: expect.any(String),
+          username: expect.any(String),
+          date: expect.any(String),
+          content: expect.any(String),
+          is_deleted: expect.any(Boolean),
+        }));
+        expect(threadComments[1]).toEqual(expect.objectContaining({
+          id: expect.any(String),
+          username: expect.any(String),
+          date: expect.any(String),
+          content: expect.any(String),
+          is_deleted: expect.any(Boolean),
+        }));
       });
     });
   });

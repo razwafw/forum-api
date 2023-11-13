@@ -6,7 +6,6 @@ const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
 const AuthorizationError = require('../../../Commons/exceptions/AuthorizationError');
 const AddReply = require('../../../Domains/replies/entities/AddReply');
 const AddedReply = require('../../../Domains/replies/entities/AddedReply');
-const ReplyDetail = require('../../../Domains/replies/entities/ReplyDetail');
 const pool = require('../../database/postgres/pool');
 const ReplyRepositoryPostgres = require('../ReplyRepositoryPostgres');
 
@@ -351,7 +350,6 @@ describe('ReplyRepositoryPostgres', () => {
         owner: fakeUserId,
         date: fakeDateReplyB,
       });
-      await CommentRepliesTableTestHelper.removeReplyById(fakeReplyIdB);
       const replyRepositoryPostgres = new ReplyRepositoryPostgres(
         pool,
         {},
@@ -361,20 +359,21 @@ describe('ReplyRepositoryPostgres', () => {
       const commentReplies = await replyRepositoryPostgres.getRepliesByCommentId(fakeCommentId);
 
       // Assert
-      expect(commentReplies).toStrictEqual([
-        new ReplyDetail({
-          id: 'reply-456',
-          content: '**balasan telah dihapus**',
-          date: fakeDateReplyB,
-          username: 'fake_user',
-        }),
-        new ReplyDetail({
-          id: 'reply-123',
-          content: 'a comment reply',
-          date: fakeDateReplyA,
-          username: 'fake_user',
-        }),
-      ]);
+      expect(commentReplies).toHaveLength(2);
+      expect(commentReplies[0]).toEqual(expect.objectContaining({
+        id: expect.any(String),
+        content: expect.any(String),
+        date: expect.any(String),
+        username: expect.any(String),
+        is_deleted: expect.any(Boolean),
+      }));
+      expect(commentReplies[1]).toEqual(expect.objectContaining({
+        id: expect.any(String),
+        content: expect.any(String),
+        date: expect.any(String),
+        username: expect.any(String),
+        is_deleted: expect.any(Boolean),
+      }));
     });
   });
 });
