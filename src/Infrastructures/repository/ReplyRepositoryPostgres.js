@@ -54,7 +54,7 @@ class ReplyRepositoryPostgres extends ReplyRepository {
 
   async _verifyCommentExistence(threadId, commentId) {
     const query = {
-      text: 'SELECT * FROM thread_comments where id = $1 AND thread_id = $2',
+      text: 'SELECT id FROM thread_comments where id = $1 AND thread_id = $2',
       values: [commentId, threadId],
     };
 
