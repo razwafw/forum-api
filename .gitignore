@@ -4,3 +4,4 @@ plans
 config/database/test.json
 coverage
 .env
+forum-api_app-server.pem
