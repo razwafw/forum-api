@@ -5,7 +5,7 @@ This project was made in order to complete the requirements of the first project
 
 *Note: This project was developed and tested using Node.js v18.12.1 and PostgreSQL v15.3*
 
-## Setting Up
+## Setting Up Locally
 In order to run the API server successfuly, several things need to be set up first:
 
 ### Database Setup (PostgreSQL)
@@ -33,7 +33,7 @@ After the server has been successfuly started, you should be able to interact wi
 
 To view all of the possible interactions with the server, you can import the Postman testing and environment files in the ```postman_testing``` folder and then run the tests.
 
-Another way to interact is through the browser (not recommended) or through the curl command using the command prompt. Below are the complete documentation of possible curl commands with the API server.
+Another way is through the curl command using the command prompt. Below are the complete documentation of possible curl commands with the API server.
 
 *Note: Since the output is JSON based, it can be tidied up using libraries such as jq*
 
@@ -220,7 +220,3 @@ This command should return the following response:
     }
 }
 ```
-
-## Post Interaction
-There are a few things to take note of after interaction with the server:
-- To clean the tables inside of the database use the command ```TRUNCATE TABLE XXX,XXX CASCADE``` when the database is accessed
