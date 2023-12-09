@@ -42,6 +42,7 @@ describe('an CommentDetail entity', () => {
       date,
       replies,
       content,
+      likeCount,
     } = new CommentDetail(payload);
 
     // Assert
@@ -50,5 +51,6 @@ describe('an CommentDetail entity', () => {
     expect(date).toEqual('Jan 1st, 1970');
     expect(replies).toEqual([]);
     expect(content).toEqual('a thread comment');
+    expect(likeCount).toEqual(-1);
   });
 });
