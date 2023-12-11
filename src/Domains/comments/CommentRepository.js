@@ -12,6 +12,14 @@ class CommentRepository {
   async removeCommentById(threadId, commentId, userId) {
     throw new Error('COMMENT_REPOSITORY.METHOD_NOT_IMPLEMENTED');
   }
+
+  async addCommentLikeByCommentId(threadId, commentId, userId) {
+    throw new Error('COMMENT_REPOSITORY.METHOD_NOT_IMPLEMENTED');
+  }
+
+  async removeCommentLikeByCommentId(threadId, commentId, userId) {
+    throw new Error('COMMENT_REPOSITORY.METHOD_NOT_IMPLEMENTED');
+  }
 }
 
 module.exports = CommentRepository;
