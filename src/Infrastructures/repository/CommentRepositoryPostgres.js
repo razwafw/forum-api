@@ -24,7 +24,7 @@ class CommentRepositoryPostgres extends CommentRepository {
       const result = await this._pool.query(query);
       return new AddedComment({ ...result.rows[0] });
     } catch {
-      throw new NotFoundError('komentar tidak dapat ditambahkan karena thread invalid');
+      throw new NotFoundError('komentar tidak dapat ditambahkan');
     }
   }
 
