@@ -1,6 +1,7 @@
 const ThreadCommentsTableTestHelper = require('../../../../tests/ThreadCommentsTableTestHelper');
 const ThreadsTableTestHelper = require('../../../../tests/ThreadsTableTestHelper');
 const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
+const CommentLikesTableTestHelper = require('../../../../tests/CommentLikesTableTestHelper');
 const AuthorizationError = require('../../../Commons/exceptions/AuthorizationError');
 const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
 const AddComment = require('../../../Domains/comments/entities/AddComment');
@@ -13,6 +14,7 @@ describe('CommentRepositoryPostgres', () => {
     await ThreadCommentsTableTestHelper.cleanTable();
     await ThreadsTableTestHelper.cleanTable();
     await UsersTableTestHelper.cleanTable();
+    await CommentLikesTableTestHelper.cleanTable();
   });
 
   afterAll(async () => {
@@ -186,55 +188,132 @@ describe('CommentRepositoryPostgres', () => {
         .rejects
         .toThrowError(AuthorizationError);
     });
+  });
 
-    describe('getCommentsByThreadId function', () => {
-      it('should return comments data correctly', async () => {
-        // Arrange
-        const fakeThreadId = 'thread-123';
-        const fakeCommentIdA = 'comment-123';
-        const fakeCommentIdB = 'comment-456';
-        const fakeUserId = 'user-123';
-        const fakeUsername = 'fake_user';
+  describe('getCommentsByThreadId function', () => {
+    it('should return comments data correctly', async () => {
+      // Arrange
+      const fakeThreadId = 'thread-123';
+      const fakeCommentIdA = 'comment-123';
+      const fakeCommentIdB = 'comment-456';
+      const fakeUserId = 'user-123';
+      const fakeUsername = 'fake_user';
 
-        await UsersTableTestHelper.addUser({ id: fakeUserId, username: fakeUsername });
-        await ThreadsTableTestHelper.addThread({ id: fakeThreadId, owner: fakeUserId });
-        await ThreadCommentsTableTestHelper.addComment({
-          id: fakeCommentIdA,
-          threadId: fakeThreadId,
-          owner: fakeUserId,
-          date: 'Jan 1st, 1970',
-        });
-        await ThreadCommentsTableTestHelper.addComment({
-          id: fakeCommentIdB,
-          threadId: fakeThreadId,
-          owner: fakeUserId,
-          date: 'Jan 1st, 1970',
-        });
-        const commentRepositoryPostgres = new CommentRepositoryPostgres(
-          pool,
-          {},
-        );
-
-        // Action
-        const threadComments = await commentRepositoryPostgres.getCommentsByThreadId(fakeThreadId);
-
-        // Assert
-        expect(threadComments).toHaveLength(2);
-        expect(threadComments[0]).toEqual(expect.objectContaining({
-          id: expect.any(String),
-          username: expect.any(String),
-          date: expect.any(String),
-          content: expect.any(String),
-          is_deleted: expect.any(Boolean),
-        }));
-        expect(threadComments[1]).toEqual(expect.objectContaining({
-          id: expect.any(String),
-          username: expect.any(String),
-          date: expect.any(String),
-          content: expect.any(String),
-          is_deleted: expect.any(Boolean),
-        }));
+      await UsersTableTestHelper.addUser({ id: fakeUserId, username: fakeUsername });
+      await ThreadsTableTestHelper.addThread({ id: fakeThreadId, owner: fakeUserId });
+      await ThreadCommentsTableTestHelper.addComment({
+        id: fakeCommentIdA,
+        threadId: fakeThreadId,
+        owner: fakeUserId,
+        date: 'Jan 1st, 1970',
       });
+      await ThreadCommentsTableTestHelper.addComment({
+        id: fakeCommentIdB,
+        threadId: fakeThreadId,
+        owner: fakeUserId,
+        date: 'Jan 1st, 1970',
+      });
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(
+        pool,
+        {},
+      );
+
+      // Action
+      const threadComments = await commentRepositoryPostgres.getCommentsByThreadId(fakeThreadId);
+
+      // Assert
+      expect(threadComments).toHaveLength(2);
+      expect(threadComments[0]).toEqual(expect.objectContaining({
+        id: expect.any(String),
+        username: expect.any(String),
+        date: expect.any(String),
+        content: expect.any(String),
+        is_deleted: expect.any(Boolean),
+      }));
+      expect(threadComments[1]).toEqual(expect.objectContaining({
+        id: expect.any(String),
+        username: expect.any(String),
+        date: expect.any(String),
+        content: expect.any(String),
+        is_deleted: expect.any(Boolean),
+      }));
+    });
+  });
+
+  describe('addCommentLikeByCommentId function', () => {
+    it('should add comment like successfully', async () => {
+      // Arrange
+      const fakeThreadId = 'thread-123';
+      const fakeCommentId = 'comment-123';
+      const fakeUserId = 'user-123';
+      const fakeUsername = 'fake_user';
+      const fakeIdGenerator = () => '123';
+
+      await UsersTableTestHelper.addUser({ id: fakeUserId, username: fakeUsername });
+      await ThreadsTableTestHelper.addThread({ id: fakeThreadId, owner: fakeUserId });
+      await ThreadCommentsTableTestHelper.addComment({
+        id: fakeCommentId,
+        threadId: fakeThreadId,
+        owner: fakeUserId,
+        date: 'Jan 1st, 1970',
+      });
+
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(
+        pool,
+        fakeIdGenerator,
+      );
+
+      // Action
+      const commentLikeId = await commentRepositoryPostgres.addCommentLikeByCommentId(
+        fakeCommentId,
+        fakeUserId,
+      );
+
+      // Assert
+      expect(commentLikeId).toEqual('comment_like-123');
+    });
+  });
+
+  describe('removeCommentLikeByCommentId function', () => {
+    it('should remove comment like successfully', async () => {
+      // Arrange
+      const fakeThreadId = 'thread-123';
+      const fakeCommentId = 'comment-123';
+      const fakeUserId = 'user-123';
+      const fakeUsername = 'fake_user';
+      const fakeCommentLikeId = 'comment_like-123';
+
+      await UsersTableTestHelper.addUser({ id: fakeUserId, username: fakeUsername });
+      await ThreadsTableTestHelper.addThread({ id: fakeThreadId, owner: fakeUserId });
+      await ThreadCommentsTableTestHelper.addComment({
+        id: fakeCommentId,
+        threadId: fakeThreadId,
+        owner: fakeUserId,
+        date: 'Jan 1st, 1970',
+      });
+      await CommentLikesTableTestHelper.addCommentLike({
+        id: fakeCommentLikeId,
+        commentId: fakeCommentId,
+        userId: fakeUserId,
+      });
+
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(
+        pool,
+        {},
+      );
+
+      // Action
+      const commentLikeId = await commentRepositoryPostgres.removeCommentLikeByCommentId(
+        fakeCommentId,
+        fakeUserId,
+      );
+
+      // Assert
+      expect(commentLikeId).toEqual('comment_like-123');
+      const fetchedCommentLike = await CommentLikesTableTestHelper.findCommentLikeById(
+        fakeCommentLikeId,
+      );
+      expect(fetchedCommentLike).toHaveLength(0);
     });
   });
 });

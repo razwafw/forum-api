@@ -54,6 +54,28 @@ class CommentRepositoryPostgres extends CommentRepository {
     await this._pool.query(query);
   }
 
+  async addCommentLikeByCommentId(commentId, userId) {
+    const commentLikeId = `comment_like-${this._idGenerator()}`;
+
+    const query = {
+      text: 'INSERT INTO comment_likes VALUES($1, $2, $3) RETURNING id',
+      values: [commentLikeId, commentId, userId],
+    };
+
+    const result = await this._pool.query(query);
+    return result.rows[0].id;
+  }
+
+  async removeCommentLikeByCommentId(commentId, userId) {
+    const query = {
+      text: 'DELETE FROM comment_likes WHERE comment_id = $1 AND user_id = $2 RETURNING id',
+      values: [commentId, userId],
+    };
+
+    const result = await this._pool.query(query);
+    return result.rows[0].id;
+  }
+
   async _verifyCommentAccess(threadId, commentId, userId) {
     const query = {
       text: 'SELECT owner FROM thread_comments where id = $1 AND thread_id = $2',

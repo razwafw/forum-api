@@ -13,11 +13,11 @@ class CommentRepository {
     throw new Error('COMMENT_REPOSITORY.METHOD_NOT_IMPLEMENTED');
   }
 
-  async addCommentLikeByCommentId(threadId, commentId, userId) {
+  async addCommentLikeByCommentId(commentId, userId) {
     throw new Error('COMMENT_REPOSITORY.METHOD_NOT_IMPLEMENTED');
   }
 
-  async removeCommentLikeByCommentId(threadId, commentId, userId) {
+  async removeCommentLikeByCommentId(commentId, userId) {
     throw new Error('COMMENT_REPOSITORY.METHOD_NOT_IMPLEMENTED');
   }
 }
