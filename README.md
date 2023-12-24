@@ -1,4 +1,4 @@
-# forum-api
+# forum-api (README NOT UPDATED YET)
 A RESTful API made using Hapi.js framework which implements TDD and clean architecture.
 
 This project was made in order to complete the requirements of the first project in 'Menjadi Back-End Developer Expert' class on Dicoding Academy.

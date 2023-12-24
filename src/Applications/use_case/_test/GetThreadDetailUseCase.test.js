@@ -80,6 +80,13 @@ describe('GetThreadDetailUseCase', () => {
       .mockImplementation(() => Promise.resolve(mockThreadDetail));
     mockCommentRepository.getCommentsByThreadId = jest.fn()
       .mockImplementation(() => Promise.resolve(mockCommentDetails));
+    mockCommentRepository.getCommentLikesCountByCommentId = jest.fn()
+      .mockImplementation((commentId) => {
+        if (commentId === 'comment-123') {
+          return Promise.resolve(2);
+        }
+        return Promise.resolve(1);
+      });
     mockReplyRepository.getRepliesByCommentId = jest.fn()
       .mockImplementation((commentId) => {
         if (commentId === 'comment-123') {
@@ -119,6 +126,7 @@ describe('GetThreadDetailUseCase', () => {
             }),
           ],
           content: 'a thread comment',
+          likeCount: 1,
         }),
         new CommentDetail({
           id: 'comment-123',
@@ -139,11 +147,13 @@ describe('GetThreadDetailUseCase', () => {
             }),
           ],
           content: '**komentar telah dihapus**',
+          likeCount: 2,
         }),
       ],
     }));
     expect(mockThreadRepository.getThreadById).toBeCalledWith('thread-123');
     expect(mockCommentRepository.getCommentsByThreadId).toBeCalledWith('thread-123');
+    expect(mockCommentRepository.getCommentLikesCountByCommentId).toBeCalledTimes(2);
     expect(mockReplyRepository.getRepliesByCommentId).toBeCalledTimes(2);
   });
 });

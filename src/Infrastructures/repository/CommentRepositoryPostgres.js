@@ -24,7 +24,7 @@ class CommentRepositoryPostgres extends CommentRepository {
       const result = await this._pool.query(query);
       return new AddedComment({ ...result.rows[0] });
     } catch {
-      throw new NotFoundError('komentar tidak dapat ditambahkan karena thread invalid');
+      throw new NotFoundError('komentar tidak dapat ditambahkan');
     }
   }
 
@@ -54,6 +54,43 @@ class CommentRepositoryPostgres extends CommentRepository {
     await this._pool.query(query);
   }
 
+  async addCommentLikeByCommentId(threadId, commentId, userId) {
+    await this._verifyCommentExistence(threadId, commentId);
+
+    const commentLikeId = `comment_like-${this._idGenerator()}`;
+
+    const query = {
+      text: 'INSERT INTO comment_likes VALUES($1, $2, $3)',
+      values: [commentLikeId, commentId, userId],
+    };
+
+    await this._pool.query(query);
+
+    return 'berhasil menyukai komentar';
+  }
+
+  async removeCommentLikeByCommentId(commentId, userId) {
+    const query = {
+      text: 'DELETE FROM comment_likes WHERE comment_id = $1 AND user_id = $2',
+      values: [commentId, userId],
+    };
+
+    await this._pool.query(query);
+
+    return 'berhasil membatalkan aksi menyukai komentar';
+  }
+
+  async getCommentLikesCountByCommentId(commentId) {
+    const query = {
+      text: 'SELECT COUNT(*) FROM comment_likes WHERE comment_id = $1',
+      values: [commentId],
+    };
+
+    const result = await this._pool.query(query);
+
+    return Number(result.rows[0].count);
+  }
+
   async _verifyCommentAccess(threadId, commentId, userId) {
     const query = {
       text: 'SELECT owner FROM thread_comments where id = $1 AND thread_id = $2',
@@ -68,6 +105,19 @@ class CommentRepositoryPostgres extends CommentRepository {
 
     if (result.rows[0].owner !== userId) {
       throw new AuthorizationError('Anda bukan pemilik komentar tersebut');
+    }
+  }
+
+  async _verifyCommentExistence(threadId, commentId) {
+    const query = {
+      text: 'SELECT id FROM thread_comments where id = $1 AND thread_id = $2',
+      values: [commentId, threadId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      throw new NotFoundError('komentar atau thread invalid');
     }
   }
 }

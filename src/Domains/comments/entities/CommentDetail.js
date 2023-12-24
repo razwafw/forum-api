@@ -8,6 +8,7 @@ class CommentDetail {
       date,
       replies = [],
       content,
+      likeCount = -1,
     } = payload;
 
     this.id = id;
@@ -15,6 +16,7 @@ class CommentDetail {
     this.date = date;
     this.replies = replies;
     this.content = content;
+    this.likeCount = likeCount;
   }
 
   // eslint-disable-next-line class-methods-use-this

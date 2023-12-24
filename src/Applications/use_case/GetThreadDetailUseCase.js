@@ -42,6 +42,13 @@ class GetThreadDetailUseCase {
       // eslint-disable-next-line no-param-reassign
       commentDetail.replies = commentReplies;
 
+      const commentLikesCount = await this._commentRepository.getCommentLikesCountByCommentId(
+        commentDetail.id,
+      );
+
+      // eslint-disable-next-line no-param-reassign
+      commentDetail.likeCount = commentLikesCount;
+
       return commentDetail;
     }));
 

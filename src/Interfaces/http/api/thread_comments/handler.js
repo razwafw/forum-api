@@ -2,6 +2,7 @@ const autoBind = require('auto-bind');
 
 const AddCommentUseCase = require('../../../../Applications/use_case/AddCommentUseCase');
 const RemoveCommentUseCase = require('../../../../Applications/use_case/RemoveCommentUseCase');
+const LikeUnlikeCommentUseCase = require('../../../../Applications/use_case/LikeUnlikeCommentUseCase');
 
 class ThreadCommentsHandler {
   constructor(container) {
@@ -36,6 +37,20 @@ class ThreadCommentsHandler {
     const response = h.response({
       status: 'success',
       message: 'komentar berhasil dihapus',
+    });
+    return response;
+  }
+
+  async putThreadCommentLikeHandler(request, h) {
+    const likeUnlikeCommentUseCase = this._container.getInstance(LikeUnlikeCommentUseCase.name);
+    const { id: userId } = request.auth.credentials;
+    const { threadId, commentId } = request.params;
+
+    const message = await likeUnlikeCommentUseCase.execute(threadId, commentId, userId);
+
+    const response = h.response({
+      status: 'success',
+      message,
     });
     return response;
   }
