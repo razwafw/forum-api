@@ -80,6 +80,17 @@ class CommentRepositoryPostgres extends CommentRepository {
     return 'berhasil membatalkan aksi menyukai komentar';
   }
 
+  async getCommentLikesCountByCommentId(commentId) {
+    const query = {
+      text: 'SELECT COUNT(*) FROM comment_likes WHERE comment_id = $1',
+      values: [commentId],
+    };
+
+    const result = await this._pool.query(query);
+
+    return Number(result.rows[0].count);
+  }
+
   async _verifyCommentAccess(threadId, commentId, userId) {
     const query = {
       text: 'SELECT owner FROM thread_comments where id = $1 AND thread_id = $2',

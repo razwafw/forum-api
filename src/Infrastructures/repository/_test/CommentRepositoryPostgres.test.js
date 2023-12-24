@@ -346,4 +346,51 @@ describe('CommentRepositoryPostgres', () => {
       expect(fetchedCommentLike).toHaveLength(0);
     });
   });
+
+  describe('getCommentLikesCountByCommentId function', () => {
+    it('should get the comment likes count successfully', async () => {
+      // Arrange
+      const fakeThreadId = 'thread-123';
+      const fakeCommentId = 'comment-123';
+      const fakeUserIdA = 'user-123';
+      const fakeUsernameA = 'fake_user_a';
+      const fakeUserIdB = 'user-456';
+      const fakeUsernameB = 'fake_user_b';
+      const fakeCommentLikeIdA = 'comment_like-123';
+      const fakeCommentLikeIdB = 'comment_like-456';
+
+      await UsersTableTestHelper.addUser({ id: fakeUserIdA, username: fakeUsernameA });
+      await UsersTableTestHelper.addUser({ id: fakeUserIdB, username: fakeUsernameB });
+      await ThreadsTableTestHelper.addThread({ id: fakeThreadId, owner: fakeUserIdA });
+      await ThreadCommentsTableTestHelper.addComment({
+        id: fakeCommentId,
+        threadId: fakeThreadId,
+        owner: fakeUserIdA,
+        date: 'Jan 1st, 1970',
+      });
+      await CommentLikesTableTestHelper.addCommentLike({
+        id: fakeCommentLikeIdA,
+        commentId: fakeCommentId,
+        userId: fakeUserIdA,
+      });
+      await CommentLikesTableTestHelper.addCommentLike({
+        id: fakeCommentLikeIdB,
+        commentId: fakeCommentId,
+        userId: fakeUserIdB,
+      });
+
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(
+        pool,
+        {},
+      );
+
+      // Action
+      const likeCount = await commentRepositoryPostgres.getCommentLikesCountByCommentId(
+        fakeCommentId,
+      );
+
+      // Assert
+      expect(likeCount).toEqual(2);
+    });
+  });
 });
