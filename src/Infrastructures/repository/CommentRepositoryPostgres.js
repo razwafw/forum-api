@@ -54,26 +54,30 @@ class CommentRepositoryPostgres extends CommentRepository {
     await this._pool.query(query);
   }
 
-  async addCommentLikeByCommentId(commentId, userId) {
+  async addCommentLikeByCommentId(threadId, commentId, userId) {
+    await this._verifyCommentExistence(threadId, commentId);
+
     const commentLikeId = `comment_like-${this._idGenerator()}`;
 
     const query = {
-      text: 'INSERT INTO comment_likes VALUES($1, $2, $3) RETURNING id',
+      text: 'INSERT INTO comment_likes VALUES($1, $2, $3)',
       values: [commentLikeId, commentId, userId],
     };
 
-    const result = await this._pool.query(query);
-    return result.rows[0].id;
+    await this._pool.query(query);
+
+    return 'berhasil menyukai komentar';
   }
 
   async removeCommentLikeByCommentId(commentId, userId) {
     const query = {
-      text: 'DELETE FROM comment_likes WHERE comment_id = $1 AND user_id = $2 RETURNING id',
+      text: 'DELETE FROM comment_likes WHERE comment_id = $1 AND user_id = $2',
       values: [commentId, userId],
     };
 
-    const result = await this._pool.query(query);
-    return result.rows[0].id;
+    await this._pool.query(query);
+
+    return 'berhasil membatalkan aksi menyukai komentar';
   }
 
   async _verifyCommentAccess(threadId, commentId, userId) {
@@ -90,6 +94,19 @@ class CommentRepositoryPostgres extends CommentRepository {
 
     if (result.rows[0].owner !== userId) {
       throw new AuthorizationError('Anda bukan pemilik komentar tersebut');
+    }
+  }
+
+  async _verifyCommentExistence(threadId, commentId) {
+    const query = {
+      text: 'SELECT id FROM thread_comments where id = $1 AND thread_id = $2',
+      values: [commentId, threadId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      throw new NotFoundError('komentar atau thread invalid');
     }
   }
 }

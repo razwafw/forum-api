@@ -74,7 +74,6 @@ describe('LikeUnlikeCommentUseCase', () => {
     expect(mockCommentRepository.addCommentLikeByCommentId)
       .rejects.toThrowError(DatabaseError);
     expect(mockCommentRepository.removeCommentLikeByCommentId).toBeCalledWith(
-      'thread-123',
       'comment-123',
       'user-123',
     );

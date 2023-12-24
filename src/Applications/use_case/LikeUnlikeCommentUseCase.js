@@ -17,7 +17,6 @@ class LikeUnlikeCommentUseCase {
     } catch (error) {
       if (error instanceof DatabaseError) {
         const message = await this._commentRepository.removeCommentLikeByCommentId(
-          threadId,
           commentId,
           userId,
         );

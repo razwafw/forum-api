@@ -264,13 +264,43 @@ describe('CommentRepositoryPostgres', () => {
       );
 
       // Action
-      const commentLikeId = await commentRepositoryPostgres.addCommentLikeByCommentId(
+      const message = await commentRepositoryPostgres.addCommentLikeByCommentId(
+        fakeThreadId,
         fakeCommentId,
         fakeUserId,
       );
 
       // Assert
-      expect(commentLikeId).toEqual('comment_like-123');
+      expect(message).toEqual('berhasil menyukai komentar');
+
+      const fetchedCommentLike = await CommentLikesTableTestHelper.findCommentLikeById(
+        'comment_like-123',
+      );
+
+      expect(fetchedCommentLike[0].comment_id).toEqual('comment-123');
+      expect(fetchedCommentLike[0].user_id).toEqual('user-123');
+    });
+
+    it('should throw NotFoundError if comment is invalid', async () => {
+      // Arrange
+      const fakeUserId = 'user-123';
+      const fakeThreadId = 'thread-123';
+      const invalidCommentId = 'comment-invalid';
+      await UsersTableTestHelper.addUser({ id: fakeUserId });
+      await ThreadsTableTestHelper.addThread({ id: fakeThreadId, owner: fakeUserId });
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(
+        pool,
+        {},
+      );
+
+      // Action & Assert
+      expect(commentRepositoryPostgres.addCommentLikeByCommentId(
+        fakeThreadId,
+        invalidCommentId,
+        fakeUserId,
+      ))
+        .rejects
+        .toThrow(NotFoundError);
     });
   });
 
@@ -303,15 +333,15 @@ describe('CommentRepositoryPostgres', () => {
       );
 
       // Action
-      const commentLikeId = await commentRepositoryPostgres.removeCommentLikeByCommentId(
+      const message = await commentRepositoryPostgres.removeCommentLikeByCommentId(
         fakeCommentId,
         fakeUserId,
       );
 
       // Assert
-      expect(commentLikeId).toEqual('comment_like-123');
+      expect(message).toEqual('berhasil membatalkan aksi menyukai komentar');
       const fetchedCommentLike = await CommentLikesTableTestHelper.findCommentLikeById(
-        fakeCommentLikeId,
+        'comment_like-123',
       );
       expect(fetchedCommentLike).toHaveLength(0);
     });
