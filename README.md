@@ -1,9 +1,11 @@
-# forum-api (README NOT UPDATED YET)
-A RESTful API made using Hapi.js framework which implements TDD and clean architecture.
+# forum-api
+A RESTful API made using Hapi.js framework which implements TDD and clean architecture that simulates simple functionalities of a forum application.
 
-This project was made in order to complete the requirements of the first project in 'Menjadi Back-End Developer Expert' class on Dicoding Academy.
+This API is also accessible via https://www.puny-parents-carry-sleepily.a276.dcdg.xyz/ or https://puny-parents-carry-sleepily.a276.dcdg.xyz/ (use https as protocol, puny-parents-carry-sleepily.a276.dcdg.xyz as hostname, and 443 as port number).
 
-*Note: This project was developed and tested using Node.js v18.12.1 and PostgreSQL v15.3*
+This project was made in order to complete the requirements of the first and second project of 'Menjadi Back-End Developer Expert' class in Dicoding Academy.
+
+*Note: This project was developed and tested using Node.js v18.12.1 and PostgreSQL v15.3, then deployed using Node.js v14.21.3 and PostgreSQL v15.3*
 
 ## Setting Up Locally
 In order to run the API server successfuly, several things need to be set up first:
@@ -182,6 +184,19 @@ This command should return the following response:
 }
 ```
 
+### Adding and Removing a Like to a Thread Comment
+To add/remove a reply to a thread comment, use the command:
+```
+curl -X PUT -H "Authorization: Bearer <access_token>" <HOST>:<PORT>/threads/<thread_id>/comments/<comment_id>/likes
+```
+This command should return the following response:
+```
+{
+    "status": "success",
+    "message": "berhasil menyukai komentar" OR "berhasil membatalkan aksi menyukai komentar"
+}
+```
+
 ### Getting Thread Details
 To get the details of a thread, use the command:
 ```
@@ -213,6 +228,7 @@ This command should return the following response:
                         ...
                     ],
                     "content": "<comment_content>"
+                    "likeCount": <comment_like_count>
                 },
                 ...
             ]
