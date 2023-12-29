@@ -1,11 +1,9 @@
 # forum-api
 A RESTful API made using Hapi.js framework which implements TDD and clean architecture that simulates simple functionalities of a forum application.
 
-This API is also accessible via https://www.puny-parents-carry-sleepily.a276.dcdg.xyz/ or https://puny-parents-carry-sleepily.a276.dcdg.xyz/ (use https as protocol, puny-parents-carry-sleepily.a276.dcdg.xyz as hostname, and 443 as port number).
-
 This project was made in order to complete the requirements of the first and second project of 'Menjadi Back-End Developer Expert' class in Dicoding Academy.
 
-*Note: This project was developed and tested using Node.js v18.12.1 and PostgreSQL v15.3, then deployed using Node.js v14.21.3 and PostgreSQL v15.3*
+*Note: This project was developed and tested using Node.js v18.12.1 and PostgreSQL v15.3*
 
 ## Setting Up Locally
 In order to run the API server successfuly, several things need to be set up first:
